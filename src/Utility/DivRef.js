@@ -1,43 +1,40 @@
 import { useState, useEffect, useRef } from "react";
 
-export const useElementWidth = () => {
-  const [width, setWidth] = useState(0);
-  const elementRef = useRef(null); 
+export const useElementWidth = (type = "width") => {
+  const [dimension, setDimension] = useState(0);
+  const elementRef = useRef(null);
 
-  const updateWidth = () => {
+  const updateDimension = () => {
     if (elementRef.current) {
-      setWidth(elementRef.current.offsetWidth);
+      if (type === "height") {
+        setDimension(elementRef.current.offsetHeight);
+      } else {
+        setDimension(elementRef.current.offsetWidth);
+      }
     }
   };
 
   useEffect(() => {
-    // ResizeObserver to watch the element's size changes
     const resizeObserver = new ResizeObserver(() => {
-      updateWidth();
+      updateDimension();
     });
 
     if (elementRef.current) {
-      resizeObserver.observe(elementRef.current); // Start observing the element
+      resizeObserver.observe(elementRef.current);
     }
-
-    // Update width when window is resized
     const handleWindowResize = () => {
-      updateWidth();
+      updateDimension();
     };
-
-    // Add window resize listener
     window.addEventListener("resize", handleWindowResize);
-
-    // Initial width calculation
-    updateWidth();
+    updateDimension();
 
     return () => {
       if (elementRef.current) {
-        resizeObserver.unobserve(elementRef.current); // Cleanup observer on unmount
+        resizeObserver.unobserve(elementRef.current);
       }
-      window.removeEventListener("resize", handleWindowResize); // Cleanup window resize listener
+      window.removeEventListener("resize", handleWindowResize);
     };
-  }, []);
+  }, [type]);
 
-  return [width, elementRef]; // Return the width and the element ref
+  return [dimension, elementRef];
 };
